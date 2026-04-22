@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../2-Home/Header';
 import Footer from '../2-Home/Footer';
 import { FaCalendarAlt, FaClock, FaUsers, FaMapMarkerAlt, FaTrash } from 'react-icons/fa';
-import { getReservations, updateReservationStatus } from '../../api';
+import { getMyReservations, deleteReservation } from '../../api';
 import './Reservations.css';
 
 export default function Reservations() {
@@ -11,17 +11,21 @@ export default function Reservations() {
   const location = useLocation();
   const [reservations, setReservations] = useState([]);
 
-  const loadReservations = async () => {
+  const loadReservations = useCallback(async () => {
     try {
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
-      const email = currentUser?.email;
-      const savedReservations = await getReservations(email);
+      if (!currentUser?.id) {
+        navigate('/');
+        return;
+      }
+
+      const savedReservations = await getMyReservations(currentUser.id);
       setReservations(savedReservations);
     } catch (error) {
       console.error('Failed to load reservations', error);
       setReservations([]);
     }
-  };
+  }, [navigate]);
 
   useEffect(() => {
     loadReservations();
@@ -42,21 +46,21 @@ export default function Reservations() {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('focus', loadReservations);
     };
-  }, []);
+  }, [loadReservations]);
 
   // Reload reservations when navigating to this page
   useEffect(() => {
     loadReservations();
-  }, [location.pathname]);
+  }, [location.pathname, loadReservations]);
 
-  const handleCancelReservation = async (id) => {
-    if (window.confirm('Are you sure you want to cancel this reservation?')) {
+  const handleDeleteReservation = async (id) => {
+    if (window.confirm('Are you sure you want to delete this reservation? This will remove it from the database.')) {
       try {
-        await updateReservationStatus(id, 'CANCELLED');
+        await deleteReservation(id);
         await loadReservations();
       } catch (error) {
-        console.error('Failed to cancel reservation', error);
-        alert('Unable to cancel the reservation. Please try again.');
+        console.error('Failed to delete reservation', error);
+        alert('Unable to delete the reservation. Please try again.');
       }
     }
   };
@@ -125,10 +129,10 @@ export default function Reservations() {
                 <div className="reservation-actions">
                   <button 
                     className="cancel-reservation-btn"
-                    onClick={() => handleCancelReservation(reservation.id)}
+                    onClick={() => handleDeleteReservation(reservation.id)}
                   >
                     <FaTrash />
-                    Cancel Reservation
+                    Delete Reservation
                   </button>
                 </div>
               </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '../2-Home/Header';
 import Footer from '../2-Home/Footer';
 import { createReservation } from '../../api';
@@ -18,6 +18,7 @@ import './Booking.css';
 
 export default function Confirmation() {
   const location = useLocation();
+  const navigate = useNavigate();
   const bookingData = useMemo(
     () =>
       location.state || {
@@ -44,35 +45,81 @@ export default function Confirmation() {
     return result;
   };
 
-  const confirmationId = bookingData.confirmationId || generateConfirmationId();
+  const confirmationId = useMemo(
+    () => bookingData.confirmationId || generateConfirmationId(),
+    [bookingData.confirmationId]
+  );
+  const savedReservationKey = `reservation_saved_${confirmationId}`;
+  const inProgressReservationKey = `reservation_in_progress_${confirmationId}`;
 
   useEffect(() => {
-    if (bookingData && location.state) {
-      const saveReservation = async () => {
-        try {
-          const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
-          await createReservation({
-            confirmationId,
-            date: bookingData.fullDate || bookingData.date,
-            time: bookingData.time,
-            guests: bookingData.guests,
-            table: bookingData.table,
-            name: bookingData.contactInfo?.fullName || 'Guest',
-            email: bookingData.contactInfo?.emailAddress || '',
-            phone: bookingData.contactInfo?.phoneNumber || '',
-            specialNotes: bookingData.specialNotes || '',
-            status: 'CONFIRMED',
-            userEmail: currentUser?.email || bookingData.contactInfo?.emailAddress || ''
-          });
-        } catch (error) {
-          console.error('Failed to save reservation', error);
-          alert('Unable to save reservation. Please try again.');
-        }
-      };
-
-      saveReservation();
+    if (!bookingData || !location.state) {
+      return;
     }
-  }, [confirmationId, bookingData, location.state]);
+
+    if (localStorage.getItem(savedReservationKey) || localStorage.getItem(inProgressReservationKey)) {
+      return;
+    }
+
+    let isMounted = true;
+    localStorage.setItem(inProgressReservationKey, 'true');
+
+    const saveReservation = async () => {
+      try {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+        if (!currentUser?.id) {
+          if (isMounted) {
+            alert('Please log in before saving your reservation.');
+            navigate('/');
+          }
+          return;
+        }
+
+        const resolvedGuests = Number(bookingData.guests) || 1;
+        const resolvedTableNumber =
+          bookingData.tableNumber != null
+            ? Number(bookingData.tableNumber)
+            : parseInt(bookingData.table?.match(/\d+/)?.[0], 10) || 1;
+
+        await createReservation({
+          confirmationId,
+          date: bookingData.date || bookingData.fullDate,
+          time: bookingData.time,
+          guests: resolvedGuests,
+          table: bookingData.table || 'Table 1',
+          tableNumber: resolvedTableNumber,
+          name: bookingData.contactInfo?.fullName || currentUser.fullName || 'Guest',
+          email: currentUser.email || bookingData.contactInfo?.emailAddress || '',
+          phone: bookingData.contactInfo?.phoneNumber || '',
+          specialNotes: bookingData.specialNotes || '',
+          status: 'CONFIRMED',
+          userId: currentUser.id
+        });
+
+        if (isMounted) {
+          localStorage.setItem(savedReservationKey, 'true');
+          localStorage.removeItem(inProgressReservationKey);
+          setTimeout(() => {
+            if (isMounted) {
+              navigate('/reservations');
+            }
+          }, 1500);
+        }
+      } catch (error) {
+        console.error('Failed to save reservation', error);
+        localStorage.removeItem(inProgressReservationKey);
+        if (isMounted) {
+          alert(`Reservation Error: ${error.message}`);
+        }
+      }
+    };
+
+    saveReservation();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [bookingData, confirmationId, inProgressReservationKey, location.state, navigate, savedReservationKey]);
 
   const maskedEmail = bookingData.contactInfo?.emailAddress
     ? bookingData.contactInfo.emailAddress.charAt(0) + '*****' + bookingData.contactInfo.emailAddress.slice(-9)

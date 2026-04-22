@@ -3,7 +3,12 @@ const prisma = require('../prisma/prisma');
 async function getAdminReservations(req, res) {
   try {
     const reservations = await prisma.reservation.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: { id: true, email: true, fullName: true }
+        }
+      }
     });
     res.json(reservations);
   } catch (error) {

@@ -9,19 +9,43 @@ datasource db {
 
 model User {
   id           Int           @id @default(autoincrement())
-  name         String
   email        String        @unique
-  reservations Reservation[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  fullName     String?
+  password     String
+  role         String        @default("USER")
+  reservations Reservation[]
+}
+
+model Menu {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
+  category    String
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Reservation {
-  id        Int      @id @default(autoincrement())
-  date      DateTime
-  status    String   @default("pending")
-  user      User     @relation(fields: [userId], references: [id])
-  userId    Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             Int      @id @default(autoincrement())
+  date           DateTime
+  status         String   @default("PENDING")
+  userId         Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  confirmationId String   @unique
+  email          String?
+  guests         Int
+  name           String?
+  phone          String?
+  specialNotes   String?
+  table          String
+  tableNumber    Int
+  time           String
+  user           User     @relation(fields: [userId], references: [id])
+
+  @@index([userId], map: "Reservation_userId_fkey")
 }

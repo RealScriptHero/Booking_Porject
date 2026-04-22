@@ -4,38 +4,43 @@ import { useNavigate, Link } from 'react-router-dom';
 import { loginUser } from '../../api';
 
 export default function Login() {
-    const [LoginData, setLoginData] = useState({
-        Addres: "",
-        Password: ""
+    const [loginData, setLoginData] = useState({
+        email: '',
+        password: ''
     });
-    const usenavigate = useNavigate();
+    const navigate = useNavigate();
+
     const handleChangeLogin = (e) => {
         const { name, value } = e.target;
-        setLoginData({ ...LoginData, [name]: value });
+        setLoginData({ ...loginData, [name]: value });
     };
 
-    const sending = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!loginData.email || !loginData.password) {
+            alert('Please enter both email and password.');
+            return;
+        }
 
         try {
             const user = await loginUser({
-                email: LoginData.Addres,
-                password: LoginData.Password
+                email: loginData.email,
+                password: loginData.password
             });
 
             localStorage.setItem('currentUser', JSON.stringify(user));
 
             if (user.role === 'ADMIN') {
-                usenavigate('/admin/menu');
+                navigate('/admin/reservations');
             } else {
-                usenavigate('/home');
+                navigate('/home');
             }
         } catch (error) {
             alert('Error: Invalid email or password');
             console.error(error);
         }
     };
-
 
     return (
         <div
@@ -58,7 +63,7 @@ export default function Login() {
                 onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
                 onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
             >
-                <form style={{ display: 'flex', flexDirection: 'column' }} onSubmit={sending}>
+                <form style={{ display: 'flex', flexDirection: 'column' }} onSubmit={handleSubmit}>
                     <h2
                         style={{
                             color: '#f5550bff',
@@ -97,11 +102,11 @@ export default function Login() {
                         Email Address
                     </label>
                     <input
-                        type="text"
-                        name="Addres"
-                        value={LoginData.Addres}
+                        type="email"
+                        name="email"
+                        value={loginData.email}
                         onChange={handleChangeLogin}
-                        placeholder="You@gmail.com"
+                        placeholder="you@example.com"
                         style={{
                             width: '100%',
                             padding: '12px',
@@ -117,8 +122,8 @@ export default function Login() {
                     </label>
                     <input
                         type="password"
-                        name="Password"
-                        value={LoginData.Password}
+                        name="password"
+                        value={loginData.password}
                         onChange={handleChangeLogin}
                         placeholder="Enter your password"
                         style={{
@@ -149,7 +154,7 @@ export default function Login() {
                         Log in
                     </button>
                     <br /> <br />
-                    <p>Don't have an account ? <Link to="/Sign-up" style={{color : '#f5550bff'}}> Sign up</Link> </p>
+                    <p>Don't have an account? <Link to="/Sign-up" style={{ color: '#f5550bff' }}>Sign up</Link></p>
                 </form>
             </div>
         </div>

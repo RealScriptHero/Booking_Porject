@@ -20,8 +20,13 @@ export default function SignUp() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (!formData.fullName || !formData.email || !formData.password) {
+            alert('Please fill in all required fields.');
+            return;
+        }
+
         if (formData.password !== formData.confirmPassword) {
-            alert("Passwords do not match!");
+            alert('Passwords do not match!');
             return;
         }
 
@@ -29,10 +34,11 @@ export default function SignUp() {
             await createUser({
                 fullName: formData.fullName,
                 email: formData.email,
-                password: formData.password
+                password: formData.password,
+                role: 'USER'
             });
 
-            alert("Account created successfully!");
+            alert('Account created successfully! Please log in.');
             navigate('/');
         } catch (error) {
             console.error(error);
@@ -177,8 +183,8 @@ export default function SignUp() {
                     >
                         Sign Up
                     </button>
-                    <br /> 
-                    <p>Already have an account? <Link to="/" style={{color : '#f5550bff'}}> Log in</Link> </p>
+                    <br />
+                    <p>Already have an account? <Link to="/" style={{ color: '#f5550bff' }}>Log in</Link></p>
                 </form>
             </div>
         </div>

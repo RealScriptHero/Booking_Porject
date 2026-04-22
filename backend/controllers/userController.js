@@ -1,4 +1,5 @@
 const prisma = require('../prisma/prisma');
+const bcrypt = require('bcrypt');
 
 async function getUsers(req, res) {
   try {
@@ -23,8 +24,8 @@ async function createUser(req, res) {
   try {
     const { fullName, email, password, role } = req.body;
 
-    if (!fullName || !email || !password) {
-      return res.status(400).json({ error: 'fullName, email and password are required' });
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
     }
 
     const existing = await prisma.user.findUnique({ where: { email } });
@@ -32,12 +33,14 @@ async function createUser(req, res) {
       return res.status(409).json({ error: 'Email already registered' });
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await prisma.user.create({
       data: {
-        fullName,
+        fullName: fullName || null,
         email,
-        password,
-        role: role || 'USER'
+        password: hashedPassword,
+        role: (role || 'USER').toUpperCase()
       }
     });
 
@@ -58,7 +61,9 @@ async function loginUser(req, res) {
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || user.password !== password) {
+    const validPassword = user ? await bcrypt.compare(password, user.password) : false;
+
+    if (!user || !validPassword) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 

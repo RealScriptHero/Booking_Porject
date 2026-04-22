@@ -35,9 +35,16 @@ export async function createUser(userData) {
   });
 }
 
-export async function getReservations(email) {
-  const query = email ? `?email=${encodeURIComponent(email)}` : '';
+export async function getReservations(userId) {
+  const query = userId ? `?userId=${encodeURIComponent(userId)}` : '';
   return fetchJson(`/api/reservations${query}`);
+}
+
+export async function getMyReservations(userId) {
+  if (!userId) {
+    throw new Error('userId is required');
+  }
+  return fetchJson(`/api/reservations/my?userId=${encodeURIComponent(userId)}`);
 }
 
 export async function createReservation(reservationData) {
@@ -51,6 +58,12 @@ export async function updateReservationStatus(id, status) {
   return fetchJson(`/api/reservations/${id}`, {
     method: 'PUT',
     body: JSON.stringify({ status })
+  });
+}
+
+export async function deleteReservation(id) {
+  return fetchJson(`/api/reservations/${id}`, {
+    method: 'DELETE'
   });
 }
 

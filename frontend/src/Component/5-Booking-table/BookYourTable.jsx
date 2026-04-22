@@ -15,7 +15,7 @@ export default function BookYourTable() {
   const [selectedDate, setSelectedDate] = useState(currentDay);
   const [selectedTime, setSelectedTime] = useState('6:30 PM');
   const [selectedTable, setSelectedTable] = useState('Table 5');
-  const [guests, setGuests] = useState('2 people');
+  const [guests, setGuests] = useState(2);
   const [currentMonth, setCurrentMonth] = useState(currentMonthIndex);
   const [currentYear, setCurrentYear] = useState(currentYearValue);
 
@@ -175,14 +175,14 @@ export default function BookYourTable() {
               <select 
                 className="guests-dropdown"
                 value={guests}
-                onChange={(e) => setGuests(e.target.value)}
+                onChange={(e) => setGuests(Number(e.target.value))}
               >
-                <option value="1 person">1 person</option>
-                <option value="2 people">2 people</option>
-                <option value="3 people">3 people</option>
-                <option value="4 people">4 people</option>
-                <option value="5 people">5 people</option>
-                <option value="6 people">6 people</option>
+                <option value={1}>1 person</option>
+                <option value={2}>2 people</option>
+                <option value={3}>3 people</option>
+                <option value={4}>4 people</option>
+                <option value={5}>5 people</option>
+                <option value={6}>6 people</option>
               </select>
             </div>
 

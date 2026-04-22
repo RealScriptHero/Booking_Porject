@@ -13,15 +13,20 @@ export default function BookingDetails() {
     month: 9,
     year: 2024,
     time: '7:30 PM',
-    table: 'Window Booth',
+    table: 'Table 5',
     guests: 2
   };
 
-  const [guests, setGuests] = useState(bookingData.guests || 2);
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+  const [guests, setGuests] = useState(
+    typeof bookingData.guests === 'string'
+      ? Number(bookingData.guests.replace(/\D/g, '')) || 2
+      : bookingData.guests || 2
+  );
   const [contactInfo, setContactInfo] = useState({
-    fullName: 'John Doe',
-    phoneNumber: '(123) 456-7890',
-    emailAddress: 'you@example.com'
+    fullName: currentUser?.fullName || 'John Doe',
+    phoneNumber: currentUser?.phone || '',
+    emailAddress: currentUser?.email || 'you@example.com'
   });
   const [specialNotes, setSpecialNotes] = useState('');
 
@@ -48,6 +53,11 @@ export default function BookingDetails() {
   };
 
   const handleConfirm = () => {
+    if (!contactInfo.fullName || !contactInfo.emailAddress) {
+      alert('Please fill in your full name and email address.');
+      return;
+    }
+
     // Generate confirmation ID
     const generateConfirmationId = () => {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -59,6 +69,8 @@ export default function BookingDetails() {
     };
 
     const confirmationId = generateConfirmationId();
+    const reservationDate = date.toISOString();
+    const tableNumber = parseInt(bookingData.table.match(/\d+/)?.[0] || '1', 10);
 
     navigate('/booking/confirmation', {
       state: {
@@ -67,7 +79,9 @@ export default function BookingDetails() {
         contactInfo,
         specialNotes,
         fullDate,
-        confirmationId
+        confirmationId,
+        date: reservationDate,
+        tableNumber
       }
     });
   };
@@ -88,7 +102,7 @@ export default function BookingDetails() {
                 <FaCalendarAlt className="detail-icon" />
                 <span className="detail-text">{fullDate} at {bookingData.time}</span>
               </div>
-              <button className="edit-btn">Edit</button>
+              <button className="edit-btn" onClick={() => navigate('/booking')}>Edit</button>
             </div>
 
             <div className="detail-item">
@@ -96,7 +110,7 @@ export default function BookingDetails() {
                 <FaTable className="detail-icon" />
                 <span className="detail-text">{bookingData.table}</span>
               </div>
-              <button className="edit-btn">Edit</button>
+              <button className="edit-btn" onClick={() => navigate('/booking')}>Edit</button>
             </div>
 
             <div className="detail-item">
