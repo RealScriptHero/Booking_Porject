@@ -5,6 +5,30 @@ import { FaUtensils, FaAward, FaUsers, FaClock, FaMapMarkerAlt, FaPhone, FaEnvel
 import './AboutUs.css';
 
 export default function AboutUs() {
+  const fallbackImage = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80';
+  const restaurantImages = [
+    {
+      id: 1,
+      src: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80',
+      alt: 'Restaurant dining area'
+    },
+    {
+      id: 2,
+      src: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=900&q=80',
+      alt: 'Restaurant bar area'
+    },
+    {
+      id: 3,
+      src: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=900&q=80',
+      alt: 'Chef preparing food'
+    },
+    {
+      id: 4,
+      src: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=900&q=80',
+      alt: 'Elegant table setting'
+    }
+  ];
+
   return (
     <div className="about-us-page">
       <Header />
@@ -18,10 +42,10 @@ export default function AboutUs() {
         </div>
       </section>
 
-      <section className="about-section">
+      <section className="about-section fade-in-section">
         <div className="about-container">
           <div className="about-content-wrapper">
-            <div className="about-text-content">
+            <div className="about-text-content slide-up-item">
               <h2 className="section-title">Our Story</h2>
               <p className="section-text">
                 Founded in 2000, The Gourmet Table has been a cornerstone of fine dining in Foodie City. 
@@ -39,22 +63,27 @@ export default function AboutUs() {
                 precision, and every guest is treated as family. Join us in celebrating the art of fine dining.
               </p>
             </div>
-            <div className="about-image-container">
+            <div className="about-image-container slide-up-item">
               <img 
-                src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop"
+                src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1000&q=80"
                 alt="Restaurant interior"
                 className="about-image"
+                loading="lazy"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = fallbackImage;
+                }}
               />
             </div>
           </div>
         </div>
       </section>
 
-      <section className="about-section values-section">
+      <section className="about-section values-section fade-in-section">
         <div className="about-container">
           <h2 className="section-title center-title">Our Values</h2>
           <div className="values-grid">
-            <div className="value-card">
+            <div className="value-card slide-up-item">
               <FaUtensils className="value-icon" />
               <h3 className="value-title">Culinary Excellence</h3>
               <p className="value-text">
@@ -62,7 +91,7 @@ export default function AboutUs() {
                 with the finest ingredients.
               </p>
             </div>
-            <div className="value-card">
+            <div className="value-card slide-up-item">
               <FaAward className="value-icon" />
               <h3 className="value-title">Award-Winning Service</h3>
               <p className="value-text">
@@ -70,7 +99,7 @@ export default function AboutUs() {
                 from the moment they arrive.
               </p>
             </div>
-            <div className="value-card">
+            <div className="value-card slide-up-item">
               <FaUsers className="value-icon" />
               <h3 className="value-title">Community First</h3>
               <p className="value-text">
@@ -83,18 +112,23 @@ export default function AboutUs() {
       </section>
 
       {/* Our Team Section */}
-      <section className="about-section team-section">
+      <section className="about-section team-section fade-in-section">
         <div className="about-container">
           <h2 className="section-title center-title">Meet Our Chef</h2>
           <div className="chef-section">
-            <div className="chef-image-container">
+            <div className="chef-image-container slide-up-item">
               <img 
-                src="https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&h=600&fit=crop"
+                src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=800&q=80"
                 alt="Head Chef"
                 className="chef-image"
+                loading="lazy"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = fallbackImage;
+                }}
               />
             </div>
-            <div className="chef-content">
+            <div className="chef-content slide-up-item">
               <h3 className="chef-name">Chef HOUDA ABIDA</h3>
               <p className="chef-title">Executive Chef & Co-Founder</p>
               <p className="chef-description">
@@ -114,38 +148,24 @@ export default function AboutUs() {
       </section>
 
       {/* Restaurant Photos Gallery */}
-      <section className="about-section gallery-section">
+      <section className="about-section gallery-section fade-in-section">
         <div className="about-container">
           <h2 className="section-title center-title">Our Restaurant</h2>
           <div className="restaurant-gallery">
-            <div className="gallery-item">
-              <img 
-                src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop"
-                alt="Restaurant dining area"
-                className="gallery-image"
-              />
-            </div>
-            <div className="gallery-item">
-              <img 
-                src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=600&h=400&fit=crop"
-                alt="Restaurant bar area"
-                className="gallery-image"
-              />
-            </div>
-            <div className="gallery-item">
-              <img 
-                src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop"
-                alt="Chef preparing food"
-                className="gallery-image"
-              />
-            </div>
-            <div className="gallery-item">
-              <img 
-                src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop"
-                alt="Elegant table setting"
-                className="gallery-image"
-              />
-            </div>
+            {restaurantImages.map((image) => (
+              <div key={image.id} className="gallery-item slide-up-item">
+                <img
+                  src={image.src}
+                  alt={image.alt}
+                  className="gallery-image"
+                  loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = fallbackImage;
+                  }}
+                />
+              </div>
+            ))}
           </div>
         </div>
       </section>

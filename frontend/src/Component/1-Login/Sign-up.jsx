@@ -42,7 +42,7 @@ export default function SignUp() {
             navigate('/');
         } catch (error) {
             console.error(error);
-            alert('Unable to create account. Please try again.');
+            alert(`Unable to create account: ${error.message}`);
         }
     };
 

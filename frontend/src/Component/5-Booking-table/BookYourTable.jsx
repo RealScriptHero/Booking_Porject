@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '../2-Home/Header';
 import Footer from '../2-Home/Footer';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
@@ -7,15 +7,18 @@ import './Booking.css';
 
 export default function BookYourTable() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const incomingBooking = location.state || {};
   const today = new Date();
-  const currentMonthIndex = today.getMonth();
-  const currentYearValue = today.getFullYear();
-  const currentDay = today.getDate();
+  const initialDate = incomingBooking.date ? new Date(incomingBooking.date) : today;
+  const currentMonthIndex = initialDate.getMonth();
+  const currentYearValue = initialDate.getFullYear();
+  const currentDay = initialDate.getDate();
   
   const [selectedDate, setSelectedDate] = useState(currentDay);
-  const [selectedTime, setSelectedTime] = useState('6:30 PM');
+  const [selectedTime, setSelectedTime] = useState(incomingBooking.time || '6:30 PM');
   const [selectedTable, setSelectedTable] = useState('Table 5');
-  const [guests, setGuests] = useState(2);
+  const [guests, setGuests] = useState(incomingBooking.guests || 2);
   const [currentMonth, setCurrentMonth] = useState(currentMonthIndex);
   const [currentYear, setCurrentYear] = useState(currentYearValue);
 
@@ -32,9 +35,11 @@ export default function BookYourTable() {
 
   // All dates are available - no restrictions
   const handleConfirm = () => {
+    const reservationDate = new Date(currentYear, currentMonth, selectedDate);
     navigate('/booking/details', {
       state: {
-        date: selectedDate,
+        date: reservationDate.toISOString(),
+        day: selectedDate,
         month: currentMonth,
         year: currentYear,
         time: selectedTime,

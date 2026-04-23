@@ -37,7 +37,7 @@ export default function Login() {
                 navigate('/home');
             }
         } catch (error) {
-            alert('Error: Invalid email or password');
+            alert(`Error: ${error.message}`);
             console.error(error);
         }
     };

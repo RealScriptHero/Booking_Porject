@@ -10,8 +10,17 @@ async function fetchJson(url, options = {}) {
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText || 'API request failed');
+    let message = 'API request failed';
+    const rawBody = await response.text();
+    if (rawBody) {
+      try {
+        const errorData = JSON.parse(rawBody);
+        message = errorData?.error || rawBody;
+      } catch (_) {
+        message = rawBody;
+      }
+    }
+    throw new Error(message);
   }
 
   return response.json();
@@ -22,14 +31,14 @@ export async function getUsers() {
 }
 
 export async function loginUser(credentials) {
-  return fetchJson('/api/users/login', {
+  return fetchJson('/api/login', {
     method: 'POST',
     body: JSON.stringify(credentials)
   });
 }
 
 export async function createUser(userData) {
-  return fetchJson('/api/users', {
+  return fetchJson('/api/register', {
     method: 'POST',
     body: JSON.stringify(userData)
   });

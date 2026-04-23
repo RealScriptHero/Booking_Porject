@@ -35,10 +35,31 @@ export default function BookingDetails() {
   
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-  const date = new Date(bookingData.year, bookingData.month, bookingData.date);
+  const parsedIncomingDate = bookingData.date ? new Date(bookingData.date) : null;
+  const hasValidIncomingDate = parsedIncomingDate instanceof Date && !Number.isNaN(parsedIncomingDate.getTime());
+
+  const normalizedYear = Number.isInteger(bookingData.year)
+    ? bookingData.year
+    : hasValidIncomingDate
+      ? parsedIncomingDate.getFullYear()
+      : new Date().getFullYear();
+  const normalizedMonth = Number.isInteger(bookingData.month)
+    ? bookingData.month
+    : hasValidIncomingDate
+      ? parsedIncomingDate.getMonth()
+      : new Date().getMonth();
+  const normalizedDay = Number.isInteger(bookingData.day)
+    ? bookingData.day
+    : hasValidIncomingDate
+      ? parsedIncomingDate.getDate()
+      : Number.isInteger(bookingData.date)
+        ? bookingData.date
+        : new Date().getDate();
+
+  const date = new Date(normalizedYear, normalizedMonth, normalizedDay);
   const dayName = dayNames[date.getDay()];
-  const monthName = monthNames[bookingData.month];
-  const fullDate = `${dayName}, ${monthName} ${bookingData.date}, ${bookingData.year}`;
+  const monthName = monthNames[normalizedMonth];
+  const fullDate = `${dayName}, ${monthName} ${normalizedDay}, ${normalizedYear}`;
 
   const handleGuestsChange = (delta) => {
     const newGuests = guests + delta;
@@ -75,6 +96,9 @@ export default function BookingDetails() {
     navigate('/booking/confirmation', {
       state: {
         ...bookingData,
+        day: normalizedDay,
+        month: normalizedMonth,
+        year: normalizedYear,
         guests,
         contactInfo,
         specialNotes,
