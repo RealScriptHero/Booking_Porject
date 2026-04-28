@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FaCalendarAlt, FaClock, FaUsers, FaMapMarkerAlt, FaTrash, FaSearch } from 'react-icons/fa';
+import { FaCalendarAlt, FaClock, FaUsers, FaMapMarkerAlt, FaTrash, FaSearch, FaDownload } from 'react-icons/fa';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import AdminLayout from './AdminLayout';
 import { getAdminReservations, getAdminStats, updateReservationStatus } from '../../api';
 import './Admin.css';
@@ -32,10 +34,37 @@ export default function AdminReservations() {
   const loadStats = async () => {
     try {
       const fetchedStats = await getAdminStats();
-      setStats(fetchedStats);
+      const totals = fetchedStats?.totals || {};
+      setStats({
+        total: totals.reservations || 0,
+        pending: totals.pending || 0,
+        confirmed: totals.confirmed || 0,
+        cancelled: totals.cancelled || 0
+      });
     } catch (error) {
       console.error('Failed to load admin stats', error);
     }
+  };
+
+  const handleExportReservationsPdf = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text('Reservations Report', 14, 15);
+    autoTable(doc, {
+      startY: 22,
+      head: [['Confirmation', 'Guest', 'Email', 'Date', 'Time', 'Guests', 'Table', 'Status']],
+      body: filteredReservations.map((reservation) => [
+        reservation.confirmationId,
+        reservation.name || 'Guest',
+        reservation.email || '-',
+        new Date(reservation.date).toLocaleDateString(),
+        reservation.time,
+        reservation.guests,
+        reservation.table,
+        reservation.status
+      ])
+    });
+    doc.save('reservations-report.pdf');
   };
 
   const handleDelete = async (id) => {
@@ -66,6 +95,10 @@ export default function AdminReservations() {
             <h1 className="admin-title">Reservations</h1>
             <p className="admin-description">View and manage all restaurant reservations.</p>
           </div>
+          <button className="add-item-btn" onClick={handleExportReservationsPdf}>
+            <FaDownload />
+            Export to PDF
+          </button>
           <div className="search-container">
             <FaSearch className="search-icon" />
             <input
@@ -82,18 +115,22 @@ export default function AdminReservations() {
           <div className="stat-card">
             <p>Total Reservations</p>
             <strong>{stats.total}</strong>
+            <span className="stat-subtitle">All booking records</span>
           </div>
           <div className="stat-card">
             <p>Confirmed</p>
             <strong>{stats.confirmed}</strong>
+            <span className="stat-subtitle">Approved reservations</span>
           </div>
           <div className="stat-card">
             <p>Pending</p>
             <strong>{stats.pending}</strong>
+            <span className="stat-subtitle">Awaiting confirmation</span>
           </div>
           <div className="stat-card">
             <p>Cancelled</p>
             <strong>{stats.cancelled}</strong>
+            <span className="stat-subtitle">Cancelled bookings</span>
           </div>
         </div>
 

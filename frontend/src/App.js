@@ -12,6 +12,8 @@ import AboutUs from "./Component/4-Contact/AboutUs";
 import Contact from "./Component/4-Contact/Contact";
 import MenuManagement from "./Component/Admin/MenuManagement";
 import AdminReservations from "./Component/Admin/AdminReservations";
+import AdminCustomers from "./Component/Admin/AdminCustomers";
+import AdminAnalytics from "./Component/Admin/AdminAnalytics";
 
 function App() {
   return (
@@ -31,6 +33,8 @@ function App() {
           <Route path="/booking/confirmation" element={<Confirmation/>} />
           <Route path="/admin/menu" element={<MenuManagement/>} />
           <Route path="/admin/reservations" element={<AdminReservations/>} />
+          <Route path="/admin/customers" element={<AdminCustomers/>} />
+          <Route path="/admin/analytics" element={<AdminAnalytics/>} />
        
       </Routes>
       </BrowserRouter>

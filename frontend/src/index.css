@@ -2,6 +2,18 @@
   box-sizing: border-box;
 }
 
+:root {
+  --primary-green: #1F3D2B;
+  --hover-green: #2E5A3D;
+  --dark-bg: #111827;
+  --dark-bg-soft: #0F172A;
+  --light-bg: #F5F1E9;
+  --text-dark: #1F2937;
+  --text-muted: #6B7280;
+  --text-light: #F9FAFB;
+  --divider-dark: #1F2937;
+}
+
 body {
   margin: 0;
   overflow-x: hidden;

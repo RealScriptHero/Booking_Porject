@@ -66,7 +66,7 @@ export default function Login() {
                 <form style={{ display: 'flex', flexDirection: 'column' }} onSubmit={handleSubmit}>
                     <h2
                         style={{
-                            color: '#f5550bff',
+                            color: '#1F3D2B',
                             fontSize: '24px',
                             display: 'flex',
                             alignItems: 'center',
@@ -75,12 +75,12 @@ export default function Login() {
                             marginBottom: '16px'
                         }}
                     >
-                        <FaUtensils style={{ color: '#f5550bff', fontSize: '24px' }} /> Reserve
+                        <FaUtensils style={{ color: '#1F3D2B', fontSize: '24px' }} /> Reserve
                     </h2>
 
                     <h1
                         style={{
-                            color: '#f5550bff',
+                            color: '#1F3D2B',
                             fontSize: '28px',
                             fontWeight: '800',
                             marginBottom: '8px'
@@ -143,18 +143,18 @@ export default function Login() {
                             padding: '14px',
                             borderRadius: '10px',
                             border: 'none',
-                            backgroundColor: '#f5550bff',
+                            backgroundColor: '#1F3D2B',
                             color: 'white',
                             fontWeight: 'bold',
                             cursor: 'pointer'
                         }}
-                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f59e0b')}
-                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#fbbf24')}
+                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#2E5A3D')}
+                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#1F3D2B')}
                     >
                         Log in
                     </button>
                     <br /> <br />
-                    <p>Don't have an account? <Link to="/Sign-up" style={{ color: '#f5550bff' }}>Sign up</Link></p>
+                    <p>Don't have an account? <Link to="/Sign-up" style={{ color: '#1F3D2B' }}>Sign up</Link></p>
                 </form>
             </div>
         </div>
