@@ -3,7 +3,10 @@ const cors = require('cors');
 const usersRouter = require('./routes/users');
 const reservationsRouter = require('./routes/reservations');
 const adminRouter = require('./routes/admin');
+const menuRouter = require('./routes/menu');
+const chatRouter = require('./routes/chat');
 const { loginUser, createUser } = require('./controllers/userController');
+const { getMyReservations } = require('./controllers/reservationController');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -14,6 +17,9 @@ app.use(express.json());
 app.use('/api/users', usersRouter);
 app.use('/api/reservations', reservationsRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/menu', menuRouter);
+app.use('/api/chat', chatRouter);
+app.get('/api/my-reservations', getMyReservations);
 app.post('/api/login', loginUser);
 app.post('/api/register', createUser);
 

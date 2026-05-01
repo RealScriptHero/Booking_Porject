@@ -14,6 +14,7 @@ import MenuManagement from "./Component/Admin/MenuManagement";
 import AdminReservations from "./Component/Admin/AdminReservations";
 import AdminCustomers from "./Component/Admin/AdminCustomers";
 import AdminAnalytics from "./Component/Admin/AdminAnalytics";
+import ChatWidget from "./Component/Chat/ChatWidget";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route path="/admin/analytics" element={<AdminAnalytics/>} />
        
       </Routes>
+      <ChatWidget />
       </BrowserRouter>
     </div>
   );

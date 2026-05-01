@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaUtensils, FaUserCircle } from 'react-icons/fa';
+import { FaUtensils, FaUserCircle, FaBars, FaTimes } from 'react-icons/fa';
 import './Home.css';
 
 export default function Header() {
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const profileRef = useRef(null);
   const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
   const displayName = currentUser?.username || currentUser?.fullName;
@@ -27,6 +28,10 @@ export default function Header() {
     navigate('/');
   };
 
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <header className="header">
       <div className="header-container">
@@ -36,16 +41,27 @@ export default function Header() {
           </div>
           <span className="logo-text">The Gourmet Table</span>
         </div>
-        <nav className="nav">
-          <Link to="/home" className="nav-link">Home</Link>
-          <Link to="/menu" className="nav-link">Menu</Link>
-          <Link to="/reservations" className="nav-link">Reservations</Link>
-          <Link to="/about" className="nav-link">About Us</Link>
-          <Link to="/contact" className="nav-link">Contact</Link>
+        <button
+          type="button"
+          className="mobile-menu-toggle"
+          aria-label="Toggle navigation menu"
+          onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+        >
+          {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
+        </button>
+        <nav className={`nav ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+          <Link to="/home" className="nav-link" onClick={closeMobileMenu}>Home</Link>
+          <Link to="/menu" className="nav-link" onClick={closeMobileMenu}>Menu</Link>
+          <Link to="/reservations" className="nav-link" onClick={closeMobileMenu}>Reservations</Link>
+          <Link to="/about" className="nav-link" onClick={closeMobileMenu}>About Us</Link>
+          <Link to="/contact" className="nav-link" onClick={closeMobileMenu}>Contact</Link>
           <div className="header-actions">
             <button
               className="btn-book-header"
-              onClick={() => navigate('/booking')}
+              onClick={() => {
+                closeMobileMenu();
+                navigate('/booking');
+              }}
             >
               Book a Table
             </button>
@@ -69,7 +85,10 @@ export default function Header() {
                   <button
                     type="button"
                     className="profile-logout-btn"
-                    onClick={handleLogout}
+                    onClick={() => {
+                      closeMobileMenu();
+                      handleLogout();
+                    }}
                   >
                     Logout
                   </button>
@@ -79,6 +98,7 @@ export default function Header() {
           </div>
         </nav>
       </div>
+      {isMobileMenuOpen ? <div className="mobile-menu-overlay" onClick={closeMobileMenu} /> : null}
     </header>
   );
 }

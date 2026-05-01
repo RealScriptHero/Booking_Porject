@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   getReservations,
   getMyReservations,
+  getAvailableTables,
   createReservation,
   updateReservation,
   deleteReservation
@@ -10,6 +11,7 @@ const {
 
 router.get('/', getReservations);
 router.get('/my', getMyReservations);
+router.get('/available', getAvailableTables);
 router.post('/', createReservation);
 router.put('/:id', updateReservation);
 router.delete('/:id', deleteReservation);

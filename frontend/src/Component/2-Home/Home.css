@@ -58,6 +58,15 @@
   gap: 30px;
 }
 
+.mobile-menu-toggle {
+  display: none;
+  border: none;
+  background: transparent;
+  color: var(--text-light);
+  font-size: 24px;
+  cursor: pointer;
+}
+
 .nav-link {
   text-decoration: none;
   color: var(--text-light);
@@ -665,13 +674,64 @@
 
 @media (max-width: 768px) {
   .header-container {
-    flex-direction: column;
-    gap: 20px;
+    padding: 0 20px;
+  }
+
+  .mobile-menu-toggle {
+    display: block;
+    z-index: 1102;
   }
 
   .nav {
-    flex-wrap: wrap;
-    justify-content: center;
+    position: fixed;
+    top: 0;
+    right: -320px;
+    width: min(80vw, 320px);
+    height: 100vh;
+    background: var(--dark-bg-soft);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 90px 20px 24px;
+    transition: right 0.3s ease;
+    z-index: 1101;
+    overflow-y: auto;
+  }
+
+  .nav.mobile-open {
+    right: 0;
+  }
+
+  .mobile-menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 1100;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-book-header,
+  .profile-icon-btn,
+  .profile-logout-btn,
+  .new-reservation-btn,
+  .book-now-btn,
+  .cancel-reservation-btn {
+    min-height: 44px;
+  }
+
+  .profile-icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .profile-dropdown {
+    right: auto;
+    left: 0;
   }
 
   .hero-title {

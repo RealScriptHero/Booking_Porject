@@ -85,6 +85,15 @@ export async function createReservation(reservationData) {
   });
 }
 
+export async function getAvailableTables(params) {
+  const query = new URLSearchParams({
+    date: params?.date || '',
+    time: params?.time || '',
+    guests: String(params?.guests || '')
+  });
+  return fetchJson(`/api/reservations/available?${query.toString()}`);
+}
+
 export async function updateReservationStatus(id, status) {
   return fetchJson(`/api/reservations/${id}`, {
     method: 'PUT',
@@ -121,5 +130,26 @@ export async function getCustomerReservations(customerId) {
 export async function deleteCustomer(customerId) {
   return fetchJson(`/api/admin/customers/${customerId}`, {
     method: 'DELETE'
+  });
+}
+
+export async function getMenuItems() {
+  return fetchJson('/api/menu');
+}
+
+export async function getMyReservationsForChat(userId) {
+  const query = userId ? `?userId=${encodeURIComponent(userId)}` : '';
+  return fetchJson(`/api/my-reservations${query}`);
+}
+
+export async function sendChatMessage({ message, userId, sessionId, history }) {
+  return fetchJson('/api/chat', {
+    method: 'POST',
+    body: JSON.stringify({
+      message,
+      userId,
+      sessionId,
+      history: history || []
+    })
   });
 }

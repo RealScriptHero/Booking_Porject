@@ -1,5 +1,16 @@
 const prisma = require('../prisma/prisma');
 
+const TABLES = [
+  { table: 'Window Table', tableNumber: 1, capacity: 2 },
+  { table: 'Window Table', tableNumber: 2, capacity: 2 },
+  { table: 'Center Table', tableNumber: 3, capacity: 4 },
+  { table: 'Center Table', tableNumber: 4, capacity: 4 },
+  { table: 'Patio Table', tableNumber: 5, capacity: 4 },
+  { table: 'Family Table', tableNumber: 6, capacity: 6 },
+  { table: 'Family Table', tableNumber: 7, capacity: 6 },
+  { table: 'VIP Table', tableNumber: 8, capacity: 8 }
+];
+
 async function getReservations(req, res) {
   try {
     const { userId } = req.query;
@@ -32,6 +43,49 @@ async function getMyReservations(req, res) {
   } catch (error) {
     console.error('getMyReservations error', error);
     res.status(500).json({ error: 'Failed to fetch user reservations' });
+  }
+}
+
+async function getAvailableTables(req, res) {
+  try {
+    const { date, time, guests } = req.query;
+    if (!date || !time || !guests) {
+      return res.status(400).json({ error: 'date, time and guests are required' });
+    }
+
+    const normalizedGuests = Number(guests);
+    if (!normalizedGuests || normalizedGuests < 1) {
+      return res.status(400).json({ error: 'guests must be a positive number' });
+    }
+
+    const occupiedReservations = await prisma.reservation.findMany({
+      where: {
+        date: new Date(date),
+        time,
+        status: { not: 'CANCELLED' }
+      },
+      select: { tableNumber: true }
+    });
+
+    const occupiedNumbers = new Set(occupiedReservations.map((item) => item.tableNumber));
+    const availableTables = TABLES
+      .filter((table) => table.capacity >= normalizedGuests && !occupiedNumbers.has(table.tableNumber))
+      .map((table) => ({
+        table: table.table,
+        tableNumber: table.tableNumber,
+        capacity: table.capacity
+      }));
+
+    res.json({
+      date,
+      time,
+      guests: normalizedGuests,
+      total: availableTables.length,
+      tables: availableTables
+    });
+  } catch (error) {
+    console.error('getAvailableTables error', error);
+    res.status(500).json({ error: 'Failed to fetch available tables' });
   }
 }
 
@@ -120,6 +174,7 @@ async function deleteReservation(req, res) {
 module.exports = {
   getReservations,
   getMyReservations,
+  getAvailableTables,
   createReservation,
   updateReservation,
   deleteReservation

@@ -583,21 +583,19 @@
     margin-left: 220px;
   }
 
+  .reservations-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .table-header,
   .table-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
+    min-width: 860px;
   }
 
-  .table-cell {
-    padding: 4px 0;
-  }
-
-  .table-cell::before {
-    content: attr(data-label);
-    font-weight: 700;
-    margin-right: 8px;
-    color: #7f8c8d;
+  .customers-table .table-header,
+  .customers-table .table-row {
+    min-width: 760px;
   }
 }
 
