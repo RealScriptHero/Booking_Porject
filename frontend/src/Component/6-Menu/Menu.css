@@ -268,12 +268,23 @@
 
   .category-tabs {
     padding: 0 20px 30px;
-    gap: 8px;
+    gap: 12px;
+    flex-direction: column;
   }
 
   .category-tab {
-    padding: 10px 16px;
+    width: 100%;
+    min-height: 44px;
+    padding: 12px 16px;
     font-size: 14px;
+  }
+
+  .menu-item-card {
+    width: 100%;
+  }
+
+  .menu-item-info {
+    padding: 0 18px 18px;
   }
 }
 

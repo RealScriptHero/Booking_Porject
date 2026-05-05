@@ -698,6 +698,12 @@
     overflow-y: auto;
   }
 
+  .nav-link {
+    width: 100%;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
   .nav.mobile-open {
     right: 0;
   }
@@ -713,6 +719,8 @@
     width: 100%;
     flex-direction: column;
     align-items: stretch;
+    gap: 14px;
+    padding-top: 6px;
   }
 
   .btn-book-header,
@@ -725,13 +733,19 @@
   }
 
   .profile-icon-btn {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
+  }
+
+  .profile-menu-wrapper {
+    align-self: center;
+    margin-top: 2px;
   }
 
   .profile-dropdown {
     right: auto;
-    left: 0;
+    left: 50%;
+    transform: translateX(-50%);
   }
 
   .hero-title {

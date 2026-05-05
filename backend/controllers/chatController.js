@@ -28,10 +28,23 @@ function getSession(sessionKey) {
   if (!sessions.has(sessionKey)) {
     sessions.set(sessionKey, {
       pendingIntent: null,
-      reservationDraft: {}
+      reservationDraft: {},
+      pendingCalendarReservation: null
     });
   }
   return sessions.get(sessionKey);
+}
+
+function isAffirmative(message) {
+  const text = normalizeText(message);
+  const keywords = ['yes', 'yeah', 'yep', 'ok', 'okay', 'sure', 'add it', 'add', 'please do', 'do it', 'iwa', 'ah'];
+  return keywords.some((keyword) => text === keyword || text.includes(keyword));
+}
+
+function isNegative(message) {
+  const text = normalizeText(message);
+  const keywords = ['no', 'nope', 'later', 'not now', 'maybe later', 'la', 'not yet'];
+  return keywords.some((keyword) => text === keyword || text.includes(keyword));
 }
 
 function detectIntent(message) {
@@ -134,6 +147,49 @@ async function findAvailableTables({ date, time, guests }) {
   return TABLES.filter((table) => table.capacity >= guests && !occupiedNumbers.has(table.tableNumber));
 }
 
+function parseTimeTo24Hour(value) {
+  const source = String(value || '').trim();
+  const twelveHour = source.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (twelveHour) {
+    let hours = Number(twelveHour[1]);
+    const minutes = Number(twelveHour[2]);
+    const period = twelveHour[3].toUpperCase();
+    if (period === 'PM' && hours !== 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+    return { hours, minutes };
+  }
+  const twentyFourHour = source.match(/^(\d{1,2}):(\d{2})$/);
+  if (twentyFourHour) {
+    return { hours: Number(twentyFourHour[1]), minutes: Number(twentyFourHour[2]) };
+  }
+  return { hours: 19, minutes: 0 };
+}
+
+function formatGoogleCalendarDate(value) {
+  return new Date(value).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+}
+
+function buildGoogleCalendarUrl(reservation) {
+  const startDate = new Date(reservation.date);
+  const { hours, minutes } = parseTimeTo24Hour(reservation.time);
+  startDate.setHours(hours, minutes, 0, 0);
+  const endDate = new Date(startDate);
+  endDate.setHours(startDate.getHours() + 2);
+
+  const details = [
+    `Reservation ID: ${reservation.confirmationId}`,
+    `Guest name: ${reservation.name || 'Guest'}`,
+    `Number of guests: ${reservation.guests || 1}`,
+    `Email: ${reservation.email || 'Not provided'}`
+  ].join('\n');
+
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
+    'Restaurant Reservation'
+  )}&dates=${formatGoogleCalendarDate(startDate)}/${formatGoogleCalendarDate(endDate)}&details=${encodeURIComponent(
+    details
+  )}&location=${encodeURIComponent('The Gourmet Table, 123 Culinary Lane')}`;
+}
+
 async function handleCreateReservation({ session, userId, message }) {
   if (!userId) {
     return { reply: 'Please log in first so I can create a reservation for your account.' };
@@ -187,9 +243,17 @@ async function handleCreateReservation({ session, userId, message }) {
 
   session.pendingIntent = null;
   session.reservationDraft = {};
+  session.pendingCalendarReservation = {
+    confirmationId: reservation.confirmationId,
+    date: reservation.date,
+    time: reservation.time,
+    guests: reservation.guests,
+    name: reservation.name,
+    email: reservation.email
+  };
 
   return {
-    reply: `Great! Your reservation is confirmed for ${draft.date} at ${draft.time} for ${draft.guests} guests. Confirmation ID: ${reservation.confirmationId}.`
+    reply: 'Your reservation is confirmed! 🎉\nWould you like me to add this to your calendar?'
   };
 }
 
@@ -203,6 +267,26 @@ async function chatWithAssistant(req, res) {
 
     const sessionKey = getSessionKey(sessionId, userId);
     const session = getSession(sessionKey);
+
+    if (session.pendingCalendarReservation) {
+      if (isAffirmative(normalizedMessage)) {
+        const calendarUrl = buildGoogleCalendarUrl(session.pendingCalendarReservation);
+        session.pendingCalendarReservation = null;
+        return res.json({
+          reply: "Great! I've opened your calendar.\nDon't forget to save the event 😊",
+          intent: 'CALENDAR_CONFIRMATION',
+          calendarUrl
+        });
+      }
+
+      if (isNegative(normalizedMessage)) {
+        session.pendingCalendarReservation = null;
+        return res.json({
+          reply: 'No problem 😊\nLet me know if you need anything else!',
+          intent: 'CALENDAR_CONFIRMATION'
+        });
+      }
+    }
 
     const intent = session.pendingIntent || detectIntent(normalizedMessage);
 

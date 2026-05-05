@@ -34,6 +34,9 @@ export function useRestaurantAssistant() {
         sessionId,
         history: nextMessages
       });
+      if (response?.calendarUrl) {
+        window.open(response.calendarUrl, '_blank', 'noopener,noreferrer');
+      }
       setMessages((prev) => [...prev, { role: 'assistant', content: response.reply || 'How can I help?' }]);
     } catch (error) {
       setMessages((prev) => [

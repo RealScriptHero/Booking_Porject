@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '../2-Home/Header';
 import Footer from '../2-Home/Footer';
 import { createReservation } from '../../api';
+import { jsPDF } from 'jspdf';
 import { 
   FaCheckCircle, 
   FaCalendarAlt, 
@@ -125,6 +126,125 @@ export default function Confirmation() {
     ? bookingData.contactInfo.emailAddress.charAt(0) + '*****' + bookingData.contactInfo.emailAddress.slice(-9)
     : 'a*****e@email.com';
 
+  const getReservationDate = () => {
+    if (bookingData?.date) {
+      const parsed = new Date(bookingData.date);
+      if (!Number.isNaN(parsed.getTime())) {
+        return parsed;
+      }
+    }
+    return new Date();
+  };
+
+  const parseTimeTo24Hour = (value) => {
+    const source = String(value || '').trim();
+    const twelveHour = source.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (twelveHour) {
+      let hours = Number(twelveHour[1]);
+      const minutes = Number(twelveHour[2]);
+      const period = twelveHour[3].toUpperCase();
+      if (period === 'PM' && hours !== 12) hours += 12;
+      if (period === 'AM' && hours === 12) hours = 0;
+      return { hours, minutes };
+    }
+
+    const twentyFourHour = source.match(/^(\d{1,2}):(\d{2})$/);
+    if (twentyFourHour) {
+      return { hours: Number(twentyFourHour[1]), minutes: Number(twentyFourHour[2]) };
+    }
+
+    return { hours: 19, minutes: 0 };
+  };
+
+  const getReservationDateTimeRange = () => {
+    const date = getReservationDate();
+    const { hours, minutes } = parseTimeTo24Hour(bookingData.time);
+    const start = new Date(date);
+    start.setHours(hours, minutes, 0, 0);
+    const end = new Date(start);
+    end.setHours(start.getHours() + 2);
+    return { start, end };
+  };
+
+  const formatGoogleCalendarDate = (value) => {
+    const date = new Date(value);
+    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  };
+
+  const handlePrintReservation = () => {
+    const doc = new jsPDF({
+      unit: 'pt',
+      format: [320, 520]
+    });
+
+    const customerName = bookingData.contactInfo?.fullName || 'Guest';
+    const customerEmail = bookingData.contactInfo?.emailAddress || 'Not provided';
+
+    doc.setFillColor(245, 245, 245);
+    doc.rect(0, 0, 320, 520, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.text('The Gourmet Table', 160, 52, { align: 'center' });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text('Reservation Ticket', 160, 70, { align: 'center' });
+    doc.setDrawColor(31, 61, 43);
+    doc.line(25, 84, 295, 84);
+
+    const lines = [
+      ['Confirmation ID', confirmationId],
+      ['Date', bookingData.fullDate || getReservationDate().toDateString()],
+      ['Time', bookingData.time || '7:00 PM'],
+      ['Guests', `${bookingData.guests || 1}`],
+      ['Customer', customerName],
+      ['Email', customerEmail]
+    ];
+
+    let y = 122;
+    lines.forEach(([label, value]) => {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.text(`${label}:`, 30, y);
+      doc.setFont('helvetica', 'normal');
+      doc.text(String(value), 120, y);
+      y += 32;
+    });
+
+    // Optional QR placeholder information for scanning/manual lookup.
+    doc.setDrawColor(180, 180, 180);
+    doc.rect(110, 325, 100, 100);
+    doc.setFontSize(9);
+    doc.text('QR (optional)', 160, 438, { align: 'center' });
+    doc.text(`Ref: ${confirmationId}`, 160, 454, { align: 'center' });
+
+    doc.setFontSize(10);
+    doc.text('Please present this ticket at arrival.', 160, 482, { align: 'center' });
+
+    doc.save(`reservation-${confirmationId.replace('#', '')}.pdf`);
+  };
+
+  const handleAddToCalendar = () => {
+    const { start, end } = getReservationDateTimeRange();
+    const customerName = bookingData.contactInfo?.fullName || 'Guest';
+    const customerEmail = bookingData.contactInfo?.emailAddress || '';
+    const description = [
+      `Reservation ID: ${confirmationId}`,
+      `Guest name: ${customerName}`,
+      `Number of guests: ${bookingData.guests || 1}`,
+      `Email: ${customerEmail || 'Not provided'}`
+    ].join('\n');
+
+    const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
+      'Restaurant Reservation'
+    )}&dates=${formatGoogleCalendarDate(start)}/${formatGoogleCalendarDate(end)}&details=${encodeURIComponent(
+      description
+    )}&location=${encodeURIComponent('The Gourmet Table, 123 Culinary Lane')}`;
+
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <div className="booking-page">
       <Header />
@@ -205,11 +325,11 @@ export default function Confirmation() {
 
         {/* Action Buttons */}
         <div className="confirmation-actions">
-          <button className="add-calendar-btn">
+          <button className="add-calendar-btn" onClick={handleAddToCalendar}>
             <FaCalendar />
             Add to Calendar
           </button>
-          <button className="print-btn">
+          <button className="print-btn" onClick={handlePrintReservation}>
             <FaPrint />
             Print Reservation
           </button>
